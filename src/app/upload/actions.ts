@@ -114,6 +114,7 @@ export async function saveReview(input: SavePayload): Promise<{ error?: string }
     if (error) return undo(`Couldn't save weekly tasks: ${error.message}`);
   }
   // Tell Next.js the home page and upload list are out of date so they reload with the new rows.
-  revalidatePath("/", "layout");
+  revalidatePath("/app");
+  revalidatePath("/upload");
   return {};
 }

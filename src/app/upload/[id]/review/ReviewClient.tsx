@@ -111,7 +111,7 @@ export default function ReviewClient({
       });
       if (res.error) setError(res.error);
       else {
-        router.push("/");
+        router.push("/app");
         router.refresh();
       }
     });

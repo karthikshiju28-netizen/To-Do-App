@@ -40,7 +40,7 @@ export default function LoginPage() {
       setBusy(false);
       setError("That code didn't work. Check it, or request a new one.");
     } else {
-      router.push("/");
+      router.push("/app");
       router.refresh();
     }
   }

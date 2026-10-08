@@ -53,5 +53,5 @@ export async function completeOnboarding(_prev: { error?: string } | undefined, 
       .insert(all.map((l, i) => ({ ...l, user_id: user.id, color: COLORS[i % COLORS.length] })));
     if (listErr) return { error: listErr.message };
   }
-  redirect("/");
+  redirect("/app");
 }
