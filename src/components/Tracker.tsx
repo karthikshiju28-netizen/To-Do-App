@@ -7,6 +7,7 @@ import { completionKey, rowsForWeek, type ScheduleData } from "@/lib/schedule";
 import { createClient } from "@/lib/supabase/client";
 import type { Item, List, Row, Semester, Template } from "@/lib/types";
 import AddModal, { type NewEntry } from "./AddModal";
+import QuickAdd from "./QuickAdd";
 import EditModal, { type EditPatch, type EditTarget } from "./EditModal";
 import SemesterModal from "./SemesterModal";
 import WeekDays from "./WeekDays";
@@ -309,6 +310,8 @@ export default function Tracker({ initial }: { initial: ScheduleSnapshot }) {
           ⚙ Semester dates
         </button>
       </div>
+
+      <QuickAdd lists={data.lists} onAdd={add} />
 
       <div className="mb-4 flex w-fit gap-1.5 rounded-full border border-line bg-panel p-1 shadow-card">
         {(["week", "semester"] as const).map((v) => (

@@ -11,49 +11,66 @@ const isBusy = (e: unknown) => /\b(503|429|500)\b|UNAVAILABLE|RESOURCE_EXHAUSTED
 
 export class ExtractionError extends Error {}
 
+type Part = { text: string } | { inlineData: { mimeType: string; data: string } };
+
+/**
+ * Asks Gemini for JSON matching `schema`. Retries when a model is busy and falls back to the next model.
+ * Returns the raw JSON text and which model answered.
+ */
+export async function generateJson(opts: {
+  system: string;
+  parts: Part[];
+  schema: unknown;
+  attemptsPerModel?: number;
+  models?: string[];
+}): Promise<{ text: string; model: string }> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new ExtractionError("The server is missing GEMINI_API_KEY.");
+  const ai = new GoogleGenAI({ apiKey });
+
+  let lastError: unknown;
+  for (const model of opts.models ?? MODELS) {
+    for (let attempt = 0; attempt < (opts.attemptsPerModel ?? 2); attempt++) {
+      try {
+        const res = await ai.models.generateContent({
+          model,
+          contents: [{ role: "user", parts: opts.parts }],
+          config: {
+            systemInstruction: opts.system,
+            responseMimeType: "application/json",
+            responseJsonSchema: opts.schema,
+            temperature: 0,
+          },
+        });
+        if (!res.text) throw new ExtractionError("The AI returned an empty answer. Please try again.");
+        return { text: res.text, model };
+      } catch (e) {
+        if (e instanceof ExtractionError) throw e;
+        lastError = e;
+        console.error(`Gemini request failed (${model}, try ${attempt + 1}):`, String(e).slice(0, 300));
+        if (!isBusy(e)) throw new ExtractionError(friendlyGeminiError(e)); // bad key or bad file: retrying won't help
+        await sleep(1500);
+      }
+    }
+  }
+  throw new ExtractionError(friendlyGeminiError(lastError));
+}
+
 /** Sends one document to Gemini and returns its structured answer. */
 export async function runGemini(
   file: { bytes: Uint8Array; mimeType: string },
   ctx: ExtractionContext,
 ): Promise<ModelOutput & { model: string }> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new ExtractionError("The server is missing GEMINI_API_KEY.");
-  const ai = new GoogleGenAI({ apiKey });
-
   const isText = file.mimeType.startsWith("text/");
-  const filePart = isText
+  const filePart: Part = isText
     ? { text: `--- DOCUMENT START ---\n${new TextDecoder().decode(file.bytes)}\n--- DOCUMENT END ---` }
     : { inlineData: { mimeType: file.mimeType, data: Buffer.from(file.bytes).toString("base64") } };
 
-  let text: string | undefined;
-  let usedModel = MODELS[0];
-  let lastError: unknown;
-  outer: for (const model of MODELS) {
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const res = await ai.models.generateContent({
-          model,
-          contents: [{ role: "user", parts: [{ text: buildUserPrompt(ctx) }, filePart] }],
-          config: {
-            systemInstruction: SYSTEM_PROMPT,
-            responseMimeType: "application/json",
-            responseJsonSchema: modelJsonSchema,
-            temperature: 0,
-          },
-        });
-        text = res.text;
-        usedModel = model;
-        break outer;
-      } catch (e) {
-        lastError = e;
-        console.error(`Gemini request failed (${model}, try ${attempt + 1}):`, String(e).slice(0, 300));
-        if (!isBusy(e)) break outer; // a real error (bad key, bad file): retrying won't help
-        await sleep(1500);
-      }
-    }
-  }
-  if (text === undefined && lastError) throw new ExtractionError(friendlyGeminiError(lastError));
-  if (!text) throw new ExtractionError("The AI returned an empty answer. Please try again.");
+  const { text, model } = await generateJson({
+    system: SYSTEM_PROMPT,
+    parts: [{ text: buildUserPrompt(ctx) }, filePart],
+    schema: modelJsonSchema,
+  });
 
   let json: unknown;
   try {
@@ -63,7 +80,7 @@ export async function runGemini(
   }
   const parsed = modelOutputSchema.safeParse(json);
   if (!parsed.success) throw new ExtractionError("The AI's answer didn't match the expected format. Please try again.");
-  return { ...parsed.data, model: usedModel };
+  return { ...parsed.data, model };
 }
 
 function friendlyGeminiError(e: unknown): string {
