@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { signOut } from "./actions";
@@ -30,6 +31,7 @@ async function Content() {
   return (
     <>
       <div className="mx-auto flex max-w-[760px] items-center justify-end gap-3 px-4 pt-3 text-xs text-dim">
+        <Link href="/upload" className="mr-auto font-semibold text-accent">＋ Upload syllabus</Link>
         {user.email}
         <form action={signOut}>
           <button className="cursor-pointer font-semibold text-accent">Sign out</button>
