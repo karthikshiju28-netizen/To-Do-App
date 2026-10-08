@@ -45,7 +45,7 @@ export default function Landing() {
           <span aria-hidden className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-accent text-[15px] text-white">✓</span>
           Syllabus To-Do
         </Link>
-        <Link href="/login" className="rounded-full px-4 py-2 text-[14px] font-semibold text-ink hover:text-accent">
+        <Link href="/login" className="rounded-full bg-accent px-5 py-2.5 text-[15px] font-bold text-white shadow-[0_4px_14px_-6px_rgba(181,85,31,0.7)] transition hover:brightness-110">
           Sign in
         </Link>
       </header>
