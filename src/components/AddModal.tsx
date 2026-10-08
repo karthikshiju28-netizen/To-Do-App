@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { DAY_FULL } from "@/lib/dates";
 import type { ItemType, List } from "@/lib/types";
@@ -18,7 +19,7 @@ export default function AddModal({
   onClose: () => void;
   onAdd: (entry: NewEntry) => void;
 }) {
-  const [mode, setMode] = useState<"weekly" | "once">("once");
+  const [mode, setMode] = useState<"weekly" | "once" | "syllabus">("once");
   const [listName, setListName] = useState("");
   const [title, setTitle] = useState("");
   const [weekday, setWeekday] = useState(0);
@@ -26,7 +27,7 @@ export default function AddModal({
   const [type, setType] = useState<ItemType>("assignment");
 
   function save() {
-    if (!listName.trim() || !title.trim()) return;
+    if (mode === "syllabus" || !listName.trim() || !title.trim()) return;
     if (mode === "weekly") {
       onAdd({ mode, listName: listName.trim(), title: title.trim(), weekday });
     } else {
@@ -35,7 +36,7 @@ export default function AddModal({
     }
   }
 
-  const modeBtn = (m: "weekly" | "once", label: string) => (
+  const modeBtn = (m: "weekly" | "once" | "syllabus", label: string) => (
     <button
       onClick={() => setMode(m)}
       className={`flex-1 cursor-pointer rounded-[7px] border p-2 text-[12.5px] font-semibold ${
@@ -49,9 +50,32 @@ export default function AddModal({
   return (
     <Modal title="Add to my list" onClose={onClose}>
       <div className="mb-3.5 flex gap-1.5">
-        {modeBtn("weekly", "Repeats weekly")}
         {modeBtn("once", "One-time")}
+        {modeBtn("weekly", "Repeats weekly")}
+        {modeBtn("syllabus", "Syllabus")}
       </div>
+      {mode === "syllabus" ? (
+        <>
+          <p className="mb-4 text-[13px] text-dim">
+            Upload a syllabus, schedule or Canvas screenshot (or paste text). We&apos;ll find every deadline and you review them before anything is saved.
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={onClose}
+              className="flex-1 cursor-pointer rounded-[7px] border border-line bg-bg p-2.5 text-[13.5px] font-bold text-dim"
+            >
+              Cancel
+            </button>
+            <Link
+              href="/upload"
+              className="flex-1 rounded-[7px] bg-accent p-2.5 text-center text-[13.5px] font-bold text-white"
+            >
+              Upload files
+            </Link>
+          </div>
+        </>
+      ) : (
+        <>
       <Field label="List">
         <input
           className={fieldInput}
@@ -99,6 +123,8 @@ export default function AddModal({
         </>
       )}
       <ModalButtons onCancel={onClose} onSave={save} saveLabel="Add" />
+        </>
+      )}
     </Modal>
   );
 }
