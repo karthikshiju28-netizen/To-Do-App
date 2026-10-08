@@ -9,6 +9,7 @@ export default function DayBlock({
   isToday,
   onToggle,
   onDelete,
+  onEdit,
 }: {
   weekday: number;
   monday: Date;
@@ -16,6 +17,7 @@ export default function DayBlock({
   isToday: boolean;
   onToggle: (row: Row) => void;
   onDelete: (row: Row) => void;
+  onEdit: (row: Row) => void;
 }) {
   return (
     <div className="border-t border-line-soft px-3.5 py-2 first:border-t-0">
@@ -26,7 +28,7 @@ export default function DayBlock({
       {rows.length === 0 ? (
         <div className="text-[12.5px] italic text-dim">Nothing due</div>
       ) : (
-        rows.map((r) => <ItemRow key={r.key} row={r} onToggle={onToggle} onDelete={onDelete} />)
+        rows.map((r) => <ItemRow key={r.key} row={r} onToggle={onToggle} onDelete={onDelete} onEdit={onEdit} />)
       )}
     </div>
   );

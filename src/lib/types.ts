@@ -4,6 +4,7 @@ export interface List {
   id: string;
   name: string; // "CEE 331", "Personal", ...
   isCourse: boolean;
+  color: string | null;
 }
 
 /** A one-time item with a specific due date. */
@@ -28,6 +29,7 @@ export interface Template {
 }
 
 export interface Semester {
+  id: string;
   name: string;
   startDate: string;
   endDate: string;

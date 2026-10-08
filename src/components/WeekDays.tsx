@@ -9,12 +9,14 @@ export default function WeekDays({
   today,
   onToggle,
   onDelete,
+  onEdit,
 }: {
   monday: Date;
   days: Row[][];
   today: Date;
   onToggle: (row: Row) => void;
   onDelete: (row: Row) => void;
+  onEdit: (row: Row) => void;
 }) {
   return (
     <>
@@ -27,6 +29,7 @@ export default function WeekDays({
           isToday={toISO(addDays(monday, i)) === toISO(today)}
           onToggle={onToggle}
           onDelete={onDelete}
+          onEdit={onEdit}
         />
       ))}
     </>

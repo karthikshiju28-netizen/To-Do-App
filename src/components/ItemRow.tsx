@@ -8,10 +8,12 @@ export default function ItemRow({
   row,
   onToggle,
   onDelete,
+  onEdit,
 }: {
   row: Row;
   onToggle: (row: Row) => void;
   onDelete: (row: Row) => void;
+  onEdit: (row: Row) => void;
 }) {
   const showType = row.kind === "item" && row.type && row.type !== "assignment" && row.type !== "task";
   return (
@@ -23,7 +25,11 @@ export default function ItemRow({
         aria-label={`Mark ${row.title} done`}
         className="mt-0.5 h-[17px] w-[17px] shrink-0 cursor-pointer accent-accent"
       />
-      <div className={`flex-1 text-[13.5px] leading-snug ${row.done ? "text-done line-through" : ""}`}>
+      <div
+        onClick={() => onEdit(row)}
+        title="Click to edit"
+        className={`flex-1 cursor-pointer text-[13.5px] leading-snug ${row.done ? "text-done line-through" : ""}`}
+      >
         <span className={`font-bold ${row.done ? "" : "text-accent"}`}>{row.listName}</span> — {row.title}
         {showType && <span className={tagClass}>{row.type}</span>}
         {row.overdueFrom && (

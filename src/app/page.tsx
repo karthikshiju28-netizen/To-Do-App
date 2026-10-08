@@ -1,29 +1,31 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { signOut } from "./actions";
 import TrackerLoader from "@/components/TrackerLoader";
+import { loadSchedule } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function Home() {
+export default function Home() {
+  // Reading the login cookie happens at request time, so it sits behind a loading boundary.
+  return (
+    <Suspense fallback={<div className="p-6 text-dim">Loading…</div>}>
+      <Content />
+    </Suspense>
+  );
+}
+
+async function Content() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // First run: no active semester yet, so send them through setup.
-  const { data: semester, error } = await supabase
-    .from("semesters")
-    .select("id")
-    .eq("is_active", true)
-    .maybeSingle();
-  if (error) {
-    return (
-      <p className="p-6 text-danger">
-        Couldn&apos;t reach the database: {error.message}. Has the SQL migration been run?
-      </p>
-    );
+  const result = await loadSchedule(supabase);
+  if (result.status === "needs-onboarding") redirect("/onboarding");
+  if (result.status === "error") {
+    return <p className="p-6 text-danger">Couldn&apos;t load your data: {result.message}</p>;
   }
-  if (!semester) redirect("/onboarding");
 
   return (
     <>
@@ -33,7 +35,7 @@ export default async function Home() {
           <button className="cursor-pointer font-semibold text-accent">Sign out</button>
         </form>
       </div>
-      <TrackerLoader />
+      <TrackerLoader initial={result.data} />
     </>
   );
 }
