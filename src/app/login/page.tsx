@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { fieldInput } from "@/components/Modal";
@@ -56,6 +57,9 @@ export default function LoginPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-[400px] flex-col justify-center px-4">
       <h1 className="mb-1 text-xl font-semibold">Syllabus To-Do</h1>
+      <p className="mb-2 text-[13px]">
+        Upload a syllabus and get a weekly to-do list. The app finds every deadline, exam and recurring task, and you review them before anything is saved.
+      </p>
       <p className="mb-6 text-[13px] text-dim">Sign in or sign up. No password needed.</p>
 
       <div className="rounded-[10px] border border-line bg-panel p-4 shadow-card">
@@ -117,6 +121,10 @@ export default function LoginPage() {
         )}
         {error && <p className="mt-2 text-xs text-danger">{error}</p>}
       </div>
+      <p className="mt-4 text-center text-[11.5px] text-dim">
+        By continuing you agree to the <Link href="/terms" className="underline">Terms</Link> and{" "}
+        <Link href="/privacy" className="underline">Privacy Policy</Link>.
+      </p>
     </main>
   );
 }
