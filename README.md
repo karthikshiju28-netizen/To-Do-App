@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Syllabus To-Do
 
-## Getting Started
+Upload a syllabus, get a weekly to-do list. Each person signs up and gets their own private list.
 
-First, run the development server:
+- **Next.js 16** (App Router) + TypeScript + Tailwind
+- **Supabase**: Postgres with Row Level Security, Auth (email link/code + Google), private Storage bucket
+- **Google Gemini** reads uploaded syllabi and parses quick-add notes (server-side only)
+
+## Run it locally
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # then fill in the values
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Database
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run the files in `supabase/migrations/` once, in order, in the Supabase dashboard (SQL Editor).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment variables
 
-## Learn More
+| Name | Where it's used |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | browser + server |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | browser + server (safe to expose; protected by Row Level Security) |
+| `GEMINI_API_KEY` | server only, never expose |
+| `GEMINI_MODEL` | optional, defaults to `gemini-3.8-flash` |
 
-To learn more about Next.js, take a look at the following resources:
+Never commit `.env.local`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Developer checks
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx tsx --env-file=.env.local scripts/test-extract.mts <file> [mime]   # run extraction on a file
+npx tsx --env-file=.env.local scripts/test-quickadd.mts                # try quick-add phrases
+npx tsx scripts/test-validate.mts                                      # offline validation rules
+```
