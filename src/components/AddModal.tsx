@@ -52,7 +52,7 @@ export default function AddModal({
       <div className="mb-3.5 flex gap-1.5">
         {modeBtn("once", "One-time")}
         {modeBtn("weekly", "Repeats weekly")}
-        {modeBtn("syllabus", "Syllabus")}
+        {modeBtn("syllabus", "Upload syllabus")}
       </div>
       {mode === "syllabus" ? (
         <>
