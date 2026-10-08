@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { ITEM_TYPES } from "@/lib/extract/types";
 import { createClient } from "@/lib/supabase/server";
@@ -112,5 +113,7 @@ export async function saveReview(input: SavePayload): Promise<{ error?: string }
     );
     if (error) return undo(`Couldn't save weekly tasks: ${error.message}`);
   }
+  // Tell Next.js the home page and upload list are out of date so they reload with the new rows.
+  revalidatePath("/", "layout");
   return {};
 }

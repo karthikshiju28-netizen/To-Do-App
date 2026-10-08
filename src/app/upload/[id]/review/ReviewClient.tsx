@@ -110,7 +110,10 @@ export default function ReviewClient({
         })),
       });
       if (res.error) setError(res.error);
-      else router.push("/");
+      else {
+        router.push("/");
+        router.refresh();
+      }
     });
   }
 
